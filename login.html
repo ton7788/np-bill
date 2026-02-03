@@ -21,6 +21,7 @@ input,button{width:100%;padding:10px;margin-top:10px}
 </div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -38,6 +39,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 window.login = async function(){
+
   const pin = document.getElementById("pin").value;
 
   if(pin.length !== 6){
@@ -45,13 +47,19 @@ window.login = async function(){
     return;
   }
 
-  const snap = await get(ref(db, "staff/" + pin));
+  try{
+    const snap = await get(ref(db, "staff/" + pin));
 
-  if(snap.exists()){
-    localStorage.setItem("user", JSON.stringify(snap.val()));
-    location.href = "staff.html";
-  }else{
-    alert("ยังไม่มี PIN นี้");
+    if(snap.exists()){
+      localStorage.setItem("user", JSON.stringify(snap.val()));
+      location.href = "staff.html";
+    }else{
+      alert("ไม่พบ PIN นี้");
+    }
+
+  }catch(err){
+    alert("เชื่อมต่อฐานข้อมูลไม่ได้: " + err.message);
+    console.log(err);
   }
 }
 </script>
