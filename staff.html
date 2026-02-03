@@ -2,137 +2,77 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>นรภัทรบิล Pro</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+<title>ออกบิล</title>
 
 <style>
-body{font-family:sarabun;background:#f3f4f6;padding:10px}
-.top{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px}
-button{padding:8px 12px;margin:4px}
-.owner{color:#0056b3;font-weight:bold}
-.staff{color:#333}
-.bill{background:#fff;padding:12px;border-radius:10px}
-input,textarea{width:100%;margin:3px 0}
-.lock{background:#eee}
+body{font-family:sans-serif;background:#f2f2f2;padding:20px}
+.box{max-width:600px;margin:auto;background:white;padding:20px}
+input,button,textarea{width:100%;padding:8px;margin-top:6px}
 </style>
 </head>
 
 <body>
 
-<div class="top">
- <div id="userBar"></div>
+<div class="box">
+<h3>ออกบิล</h3>
 
- <button onclick="newBill()">บิลใหม่</button>
- <button onclick="saveBill()">บันทึก</button>
+ลูกค้า
+<input id="cus">
 
- <button id="btnIssue" onclick="goIssue()">แจ้งบิลผิด</button>
+รายการ
+<textarea id="detail"></textarea>
 
- <button onclick="logout()">ออกจากระบบ</button>
-</div>
-
-<div class="bill">
-<h3>นรภัทร พาณิชย์</h3>
-
-<label>ลูกค้า</label>
-<input id="cust">
-
-<label>รายการ</label>
-<textarea id="items"></textarea>
-
-<label>ยอดเงิน</label>
+จำนวนเงิน
 <input id="total" type="number">
 
-<label>ผู้รับเงิน</label>
-<input id="collector" readonly>
+<button onclick="save()">บันทึกบิล</button>
+
+<button onclick="location.href='issue.html'">
+แจ้งบิลผิด
+</button>
+
+<button onclick="logout()">ออกจากระบบ</button>
+
+<div id="log"></div>
 </div>
 
-<script>
-// ===== Firebase =====
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+  apiKey: "AIzaSyAeXE8OJW...",
   authDomain: "np-bill.firebaseapp.com",
+  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "np-bill",
   storageBucket: "np-bill.firebasestorage.app",
   messagingSenderId: "516956569692",
-  appId: "1:516956569692:web:961931e70b83a314072699",
-  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app"
+  appId: "1:516956569692:web:961931e70b83a314072699"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// ===== User =====
-const u = JSON.parse(localStorage.getItem('np_user')||'{}');
+window.save = async function(){
 
-if(!u.pin){
-  location.href="login.html";
+const u = JSON.parse(localStorage.getItem("user"));
+
+await push(ref(db,"bill"),{
+  cus: cus.value,
+  detail: detail.value,
+  total: total.value,
+  by: u.name,
+  time: new Date().toLocaleString()
+});
+
+log.innerHTML = "บันทึกขึ้นคลาวด์แล้ว ✓";
 }
 
-document.getElementById('userBar').innerHTML =
-"ผู้ใช้งาน: <span class='"+u.role+"'>"+u.name+" ("+u.role+")</span>";
-
-document.getElementById('collector').value = u.name;
-
-// สิทธิ
-if(u.role !== 'owner'){
-  document.getElementById('total').readOnly = true;
-  document.getElementById('total').classList.add('lock');
-}
-
-// ===== Save Bill =====
-function saveBill(){
-
- const bill = {
-   id: Date.now(),
-   cust: cust.value,
-   items: items.value,
-   total: total.value,
-   collector: u.name,
-
-   by: u.name,
-   role: u.role,
-
-   shop: "นรภัทร พาณิชย์",
-   date: new Date().toLocaleString('th-TH'),
-
-   status: "normal"
- };
-
- if(!bill.cust) return alert("กรอกชื่อลูกค้า");
-
- // พนักงานห้ามแก้ยอด
- if(u.role !== 'owner' && bill.total > 0){
-   return alert("พนักงานแก้ยอดไม่ได้");
- }
-
- db.ref('bills/'+bill.id).set(bill, ()=>{
-   alert("บันทึกขึ้นคลาวด์แล้ว ✓");
- });
-
-}
-
-// ===== Functions =====
-function newBill(){
- if(confirm('เริ่มบิลใหม่?')){
-   location.reload();
- }
-}
-
-function goIssue(){
- location.href="issue.html";
-}
-
-function logout(){
- localStorage.removeItem('np_user');
+window.logout = ()=>{
+ localStorage.clear();
  location.href="login.html";
 }
 </script>
-
-<div style="text-align:center;margin-top:20px;font-size:12px">
-Dev by TON7788 & Gemini & Gpt
-</div>
 
 </body>
 </html>
