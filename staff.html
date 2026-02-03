@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <title>นรภัทรบิล Pro</title>
 
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
 <style>
 body{font-family:sarabun;background:#f3f4f6;padding:10px}
 .top{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px}
-
 button{padding:8px 12px;margin:4px}
 .owner{color:#0056b3;font-weight:bold}
 .staff{color:#333}
-
 .bill{background:#fff;padding:12px;border-radius:10px}
 input,textarea{width:100%;margin:3px 0}
 .lock{background:#eee}
 </style>
-
 </head>
 
 <body>
@@ -33,7 +33,6 @@ input,textarea{width:100%;margin:3px 0}
 </div>
 
 <div class="bill">
-
 <h3>นรภัทร พาณิชย์</h3>
 
 <label>ลูกค้า</label>
@@ -47,11 +46,24 @@ input,textarea{width:100%;margin:3px 0}
 
 <label>ผู้รับเงิน</label>
 <input id="collector" readonly>
-
 </div>
 
 <script>
-// ===== ตรวจผู้ใช้ =====
+// ===== Firebase =====
+const firebaseConfig = {
+  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+  authDomain: "np-bill.firebaseapp.com",
+  projectId: "np-bill",
+  storageBucket: "np-bill.firebasestorage.app",
+  messagingSenderId: "516956569692",
+  appId: "1:516956569692:web:961931e70b83a314072699",
+  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ===== User =====
 const u = JSON.parse(localStorage.getItem('np_user')||'{}');
 
 if(!u.pin){
@@ -63,15 +75,13 @@ document.getElementById('userBar').innerHTML =
 
 document.getElementById('collector').value = u.name;
 
-// ===== สิทธิ =====
+// สิทธิ
 if(u.role !== 'owner'){
-  // พนักงานห้ามแก้ยอด
   document.getElementById('total').readOnly = true;
   document.getElementById('total').classList.add('lock');
 }
 
-// ===== ฟังก์ชัน =====
-
+// ===== Save Bill =====
 function saveBill(){
 
  const bill = {
@@ -80,18 +90,30 @@ function saveBill(){
    items: items.value,
    total: total.value,
    collector: u.name,
+
    by: u.name,
    role: u.role,
-   date: new Date().toISOString()
+
+   shop: "นรภัทร พาณิชย์",
+   date: new Date().toLocaleString('th-TH'),
+
+   status: "normal"
  };
 
- let h = JSON.parse(localStorage.getItem('bills')||'[]');
- h.unshift(bill);
- localStorage.setItem('bills', JSON.stringify(h));
+ if(!bill.cust) return alert("กรอกชื่อลูกค้า");
 
- alert('บันทึกแล้ว');
+ // พนักงานห้ามแก้ยอด
+ if(u.role !== 'owner' && bill.total > 0){
+   return alert("พนักงานแก้ยอดไม่ได้");
+ }
+
+ db.ref('bills/'+bill.id).set(bill, ()=>{
+   alert("บันทึกขึ้นคลาวด์แล้ว ✓");
+ });
+
 }
 
+// ===== Functions =====
 function newBill(){
  if(confirm('เริ่มบิลใหม่?')){
    location.reload();
@@ -107,6 +129,10 @@ function logout(){
  location.href="login.html";
 }
 </script>
+
+<div style="text-align:center;margin-top:20px;font-size:12px">
+Dev by TON7788 & Gemini & Gpt
+</div>
 
 </body>
 </html>
