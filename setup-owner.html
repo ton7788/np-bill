@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>Setup Owner</title>
+</head>
+
+<body>
+
+<h2>ตั้งค่าเจ้าของร้านครั้งแรก</h2>
+
+<button onclick="setup()">
+กดครั้งเดียวสร้าง Owner
+</button>
+
+<pre id="log"></pre>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+  authDomain: "np-bill.firebaseapp.com",
+  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "np-bill",
+  storageBucket: "np-bill.firebasestorage.app",
+  messagingSenderId: "516956569692",
+  appId: "1:516956569692:web:961931e70b83a314072699"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.setup = async function(){
+
+  await set(ref(db, "staff/182521"), {
+    name: "นรภัทร พาณิชย์",
+    role: "owner",
+    pin: "182521"
+  });
+
+  await set(ref(db, "config"), {
+    shopName: "นรภัทร พาณิชย์",
+    dev: "TON7788 & Gemini & Gpt",
+    created: new Date().toString()
+  });
+
+  log.innerText = "✅ สร้าง Owner สำเร็จ!\n\nPIN = 182521\nชื่อ = นรภัทร พาณิชย์\nสิทธิ = owner";
+}
+</script>
+
+</body>
+</html>
