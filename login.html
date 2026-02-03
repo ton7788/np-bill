@@ -5,28 +5,9 @@
 <title>NP-Bill Login</title>
 
 <style>
-body{
-  font-family: sans-serif;
-  background:#f2f2f2;
-  padding:20px;
-}
-.box{
-  max-width:400px;
-  margin:auto;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-}
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-}
-button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-}
+body{font-family:sans-serif;background:#f2f2f2;padding:20px}
+.box{max-width:420px;margin:auto;background:white;padding:20px;border-radius:10px}
+input,button{width:100%;padding:10px;margin-top:10px}
 </style>
 </head>
 
@@ -37,7 +18,6 @@ button{
 
 <input id="pin" placeholder="PIN 6 หลัก" maxlength="6">
 <button onclick="login()">เข้าสู่ระบบ</button>
-
 </div>
 
 <script type="module">
@@ -45,4 +25,36 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",_
+  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+  authDomain: "np-bill.firebaseapp.com",
+  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "np-bill",
+  storageBucket: "np-bill.firebasestorage.app",
+  messagingSenderId: "516956569692",
+  appId: "1:516956569692:web:961931e70b83a314072699"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.login = async function(){
+  const pin = document.getElementById("pin").value;
+
+  if(pin.length !== 6){
+    alert("PIN ต้อง 6 หลัก");
+    return;
+  }
+
+  const snap = await get(ref(db, "staff/" + pin));
+
+  if(snap.exists()){
+    localStorage.setItem("user", JSON.stringify(snap.val()));
+    location.href = "staff.html";
+  }else{
+    alert("ยังไม่มี PIN นี้");
+  }
+}
+</script>
+
+</body>
+</html>
