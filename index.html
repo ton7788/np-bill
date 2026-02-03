@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>นรภัทรบิล Pro</title>
+<script>
+// หน้านี้ทำหน้าที่ตรวจว่าใครล็อกอิน
+document.addEventListener('DOMContentLoaded', () => {
+    const u = localStorage.getItem('np_user');
+    if(!u){
+        location.href = "login.html";
+    } else {
+        location.href = "staff.html";
+    }
+});
+</script>
+</head>
+<body>
+กำลังเข้าสู่ระบบ...
+</body>
+</html>
