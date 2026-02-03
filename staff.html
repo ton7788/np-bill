@@ -2,21 +2,105 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>ระบบบิล</title>
+<title>นรภัทรบิล Pro</title>
+
+<style>
+body{font-family:sarabun;background:#f3f4f6;padding:10px}
+.top{background:#fff;padding:10px;margin-bottom:10px;border-radius:8px}
+
+button{padding:8px 12px;margin:4px}
+.owner{color:#0056b3;font-weight:bold}
+.staff{color:#333}
+
+.bill{background:#fff;padding:12px;border-radius:10px}
+input,textarea{width:100%;margin:3px 0}
+.lock{background:#eee}
+</style>
+
 </head>
 
 <body>
 
-<h3>ระบบบิล - นรภัทร พาณิชย์</h3>
+<div class="top">
+ <div id="userBar"></div>
 
-<div id="userBar"></div>
+ <button onclick="newBill()">บิลใหม่</button>
+ <button onclick="saveBill()">บันทึก</button>
 
-<button onclick="logout()">ออกจากระบบ</button>
+ <button id="btnIssue" onclick="goIssue()">แจ้งบิลผิด</button>
+
+ <button onclick="logout()">ออกจากระบบ</button>
+</div>
+
+<div class="bill">
+
+<h3>นรภัทร พาณิชย์</h3>
+
+<label>ลูกค้า</label>
+<input id="cust">
+
+<label>รายการ</label>
+<textarea id="items"></textarea>
+
+<label>ยอดเงิน</label>
+<input id="total" type="number">
+
+<label>ผู้รับเงิน</label>
+<input id="collector" readonly>
+
+</div>
 
 <script>
+// ===== ตรวจผู้ใช้ =====
 const u = JSON.parse(localStorage.getItem('np_user')||'{}');
+
+if(!u.pin){
+  location.href="login.html";
+}
+
 document.getElementById('userBar').innerHTML =
-"ผู้ใช้งาน: " + u.name + " ("+u.role+")";
+"ผู้ใช้งาน: <span class='"+u.role+"'>"+u.name+" ("+u.role+")</span>";
+
+document.getElementById('collector').value = u.name;
+
+// ===== สิทธิ =====
+if(u.role !== 'owner'){
+  // พนักงานห้ามแก้ยอด
+  document.getElementById('total').readOnly = true;
+  document.getElementById('total').classList.add('lock');
+}
+
+// ===== ฟังก์ชัน =====
+
+function saveBill(){
+
+ const bill = {
+   id: Date.now(),
+   cust: cust.value,
+   items: items.value,
+   total: total.value,
+   collector: u.name,
+   by: u.name,
+   role: u.role,
+   date: new Date().toISOString()
+ };
+
+ let h = JSON.parse(localStorage.getItem('bills')||'[]');
+ h.unshift(bill);
+ localStorage.setItem('bills', JSON.stringify(h));
+
+ alert('บันทึกแล้ว');
+}
+
+function newBill(){
+ if(confirm('เริ่มบิลใหม่?')){
+   location.reload();
+ }
+}
+
+function goIssue(){
+ location.href="issue.html";
+}
 
 function logout(){
  localStorage.removeItem('np_user');
