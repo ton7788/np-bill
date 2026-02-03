@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>ระบบบิล</title>
+</head>
+
+<body>
+
+<h3>ระบบบิล - นรภัทร พาณิชย์</h3>
+
+<div id="userBar"></div>
+
+<button onclick="logout()">ออกจากระบบ</button>
+
+<script>
+const u = JSON.parse(localStorage.getItem('np_user')||'{}');
+document.getElementById('userBar').innerHTML =
+"ผู้ใช้งาน: " + u.name + " ("+u.role+")";
+
+function logout(){
+ localStorage.removeItem('np_user');
+ location.href="login.html";
+}
+</script>
+
+</body>
+</html>
