@@ -1,10 +1,12 @@
 {
-  "rules":{
-    "bills":{
+  "rules": {
+    "bills": {
       ".read": true,
-      ".write": true
+
+      ".write": "auth == null || auth != null"
     },
-    "users":{
+
+    "issues": {
       ".read": true,
       ".write": true
     }
