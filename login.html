@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>เข้าสู่ระบบ</title>
+
+<style>
+body{font-family:sarabun;background:#f3f4f6;text-align:center;padding:20px}
+.box{max-width:360px;margin:auto;background:#fff;padding:20px;border-radius:12px}
+input{width:100%;padding:10px;margin:6px 0}
+button{padding:10px;width:100%;margin-top:8px}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h3>เข้าสู่ระบบร้าน</h3>
+
+<input id="shopCode" placeholder="รหัสร้าน">
+<input id="email" placeholder="อีเมลเจ้าของ (เฉพาะครั้งแรก)">
+<input id="pin" placeholder="PIN 6 หลัก" maxlength="6">
+
+<button onclick="login()">เข้าสู่ระบบ</button>
+</div>
+
+<script>
+function login(){
+ const pin = document.getElementById('pin').value;
+ if(pin.length !== 6){
+   return alert('PIN ต้อง 6 หลัก');
+ }
+
+ const user = {
+   name: "พนักงานทั่วไป",
+   role: "staff",
+   pin: pin
+ };
+
+ localStorage.setItem('np_user', JSON.stringify(user));
+ location.href = "staff.html";
+}
+</script>
+
+</body>
+</html>
