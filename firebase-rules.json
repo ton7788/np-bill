@@ -1,0 +1,12 @@
+{
+  "rules":{
+    "bills":{
+      ".read": true,
+      ".write": true
+    },
+    "users":{
+      ".read": true,
+      ".write": true
+    }
+  }
+}
