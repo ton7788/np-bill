@@ -1,3 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>แจ้งบิลผิด</title>
+</head>
+
+<body>
+
 <h3>แจ้งบิลผิด</h3>
-<textarea placeholder="เหตุผลที่บิลผิด"></textarea>
-<button>ส่งเรื่องให้เจ้าของ</button>
+
+เหตุผล
+<select id="rs">
+<option>ลูกค้ายกเลิก</option>
+<option>พิมพ์ผิด</option>
+<option>อื่นๆ</option>
+</select>
+
+<textarea id="etc" placeholder="ระบุเพิ่ม"></textarea>
+
+<button onclick="send()">ส่ง</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const app = initializeApp({
+  databaseURL:"https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app"
+});
+
+const db = getDatabase(app);
+
+window.send = async ()=>{
+ await push(ref(db,"issue"),{
+   rs: rs.value,
+   etc: etc.value
+ });
+
+ alert("ส่งแล้ว");
+ location.href="staff.html";
+}
+</script>
+
+</body>
+</html>
