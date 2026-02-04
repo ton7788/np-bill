@@ -43,15 +43,15 @@ import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.
 const firebaseConfig = {
   apiKey: "AIzaSyAeXE8OJW...",
   authDomain: "np-bill.firebaseapp.com",
+ const firebaseConfig = {
+  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+  authDomain: "np-bill.firebaseapp.com",
   databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "np-bill",
   storageBucket: "np-bill.firebasestorage.app",
   messagingSenderId: "516956569692",
   appId: "1:516956569692:web:961931e70b83a314072699"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
 window.save = async function(){
 
@@ -76,3 +76,4 @@ window.logout = ()=>{
 
 </body>
 </html>
+
