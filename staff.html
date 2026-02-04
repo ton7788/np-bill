@@ -1,90 +1,98 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
-<title>NP-Bill: ออกบิล</title>
-<style>
-  body{font-family:sans-serif;background:#f2f2f2;padding:20px;text-align:center}
-  .box{max-width:500px;margin:auto;background:white;padding:30px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
-  input,button,textarea{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:1px solid #ddd;box-sizing:border-box}
-  button{background:#28a745;color:white;border:none;cursor:pointer;font-weight:bold}
-  button:hover{background:#218838}
-  .btn-issue{background:#ffc107;color:#333}
-  .btn-logout{background:#dc3545;margin-top:20px}
-  #log{margin-top:15px;color:#28a745;font-weight:bold}
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NP-Bill | ออกบิล</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1a73e8; --success: #34a853; --danger: #ea4335; }
+        body { font-family: 'Sarabun', sans-serif; background: #f1f3f4; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: #3c4043; border-bottom: 2px solid #f1f3f4; padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-size: 14px; color: #5f6368; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; font-family: 'Sarabun'; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; transition: 0.2s; }
+        .btn-main { background: var(--success); color: white; grid-column: span 2; font-size: 18px; }
+        .btn-history { background: var(--primary); color: white; }
+        .btn-issue { background: #fbbc04; color: #3c4043; }
+        .btn-logout { background: none; color: var(--danger); width: auto; font-size: 13px; }
+        #log { text-align: center; margin-top: 15px; font-weight: bold; color: var(--success); }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <span id="user-display">👤 กำลังโหลด...</span>
+            <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
+        </div>
+        
+        <div class="card">
+            <h3>📝 บันทึกการขาย</h3>
+            <label>ชื่อลูกค้า</label>
+            <input id="cus" placeholder="ระบุชื่อลูกค้า">
+            
+            <label>รายละเอียด</label>
+            <textarea id="detail" rows="3" placeholder="รายการสินค้า..."></textarea>
+            
+            <label>ยอดเงินสุทธิ (บาท)</label>
+            <input id="total" type="number" placeholder="0.00" style="font-size: 20px; font-weight: bold; color: var(--primary);">
 
-<div class="box">
-  <h3>📝 ออกบิลใหม่</h3>
-  <p id="user-display" style="color:#666"></p>
+            <div id="log"></div>
 
-  <input id="cus" placeholder="ชื่อลูกค้า">
-  <textarea id="detail" placeholder="รายการสินค้า/บริการ" rows="3"></textarea>
-  <input id="total" type="number" placeholder="จำนวนเงิน (บาท)">
+            <button class="btn-main" onclick="save()">💾 บันทึกข้อมูล</button>
+            
+            <div class="btn-group">
+                <button class="btn-history" onclick="location.href='history.html'">📊 ดูประวัติบิล</button>
+                <button class="btn-issue" onclick="location.href='issue.html'">⚠️ แจ้งปัญหา</button>
+            </div>
+        </div>
+    </div>
 
-  <button onclick="save()">💾 บันทึกบิล</button>
-  <button class="btn-issue" onclick="location.href='issue.html'">⚠️ แจ้งบิลผิด</button>
-  <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  <div id="log"></div>
-</div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+            authDomain: "np-bill.firebaseapp.com",
+            databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "np-bill",
+            storageBucket: "np-bill.firebasestorage.app",
+            messagingSenderId: "516956569692",
+            appId: "1:516956569692:web:961931e70b83a314072699"
+        };
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const userData = JSON.parse(localStorage.getItem("user"));
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
-  authDomain: "np-bill.firebaseapp.com",
-  databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "np-bill",
-  storageBucket: "np-bill.firebasestorage.app",
-  messagingSenderId: "516956569692",
-  appId: "1:516956569692:web:961931e70b83a314072699"
-};
+        if(!userData) location.href = "login.html";
+        document.getElementById("user-display").innerText = "👤 " + userData.name;
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+        window.save = async () => {
+            const cus = document.getElementById("cus").value;
+            const total = document.getElementById("total").value;
+            if(!cus || !total) return alert("กรุณากรอกข้อมูลให้ครบ");
 
-// ดึงชื่อคนใช้งานมาแสดง
-const userData = JSON.parse(localStorage.getItem("user"));
-if(!userData) { location.href = "login.html"; }
-document.getElementById("user-display").innerText = "พนักงาน: " + userData.name;
+            try {
+                await push(ref(db, "bills"), {
+                    cus, detail: document.getElementById("detail").value,
+                    total: parseFloat(total), by: userData.name,
+                    time: new Date().toLocaleString('th-TH')
+                });
+                document.getElementById("log").innerText = "✅ บันทึกสำเร็จ!";
+                document.getElementById("cus").value = "";
+                document.getElementById("detail").value = "";
+                document.getElementById("total").value = "";
+                setTimeout(() => document.getElementById("log").innerText = "", 3000);
+            } catch (e) { alert("ผิดพลาด: " + e.message); }
+        };
 
-window.save = async function(){
-  const cus = document.getElementById("cus");
-  const detail = document.getElementById("detail");
-  const total = document.getElementById("total");
-  const log = document.getElementById("log");
-
-  if(!cus.value || !total.value){
-    alert("กรุณากรอกชื่อลูกค้าและจำนวนเงิน");
-    return;
-  }
-
-  try {
-    await push(ref(db, "bills"), {
-      cus: cus.value,
-      detail: detail.value,
-      total: total.value,
-      by: userData.name,
-      time: new Date().toLocaleString('th-TH')
-    });
-
-    log.innerHTML = "✅ บันทึกขึ้นคลาวด์สำเร็จ!";
-    cus.value = ""; detail.value = ""; total.value = "";
-    setTimeout(() => { log.innerHTML = ""; }, 3000);
-  } catch(err) {
-    alert("เกิดข้อผิดพลาด: " + err.message);
-  }
-}
-
-window.logout = ()=>{
-  localStorage.clear();
-  location.href="login.html";
-}
-</script>
+        window.logout = () => { localStorage.clear(); location.href = "login.html"; };
+    </script>
 </body>
 </html>
