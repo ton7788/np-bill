@@ -3,96 +3,221 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NP-Bill | ออกบิล</title>
+    <title>NP-Bill | Professional Receipt</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a73e8; --success: #34a853; --danger: #ea4335; }
-        body { font-family: 'Sarabun', sans-serif; background: #f1f3f4; margin: 0; padding: 20px; }
+        :root { --primary: #1a73e8; --success: #34a853; --dark: #202124; }
+        body { font-family: 'Sarabun', sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: var(--dark); }
+        
+        /* สไตล์หน้าจอแอป */
         .container { max-width: 500px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        h3 { margin-top: 0; color: #3c4043; border-bottom: 2px solid #f1f3f4; padding-bottom: 10px; }
-        label { display: block; margin-top: 15px; font-size: 14px; color: #5f6368; }
-        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 6px; box-sizing: border-box; font-family: 'Sarabun'; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Sarabun'; transition: 0.2s; }
-        .btn-main { background: var(--success); color: white; grid-column: span 2; font-size: 18px; }
-        .btn-history { background: var(--primary); color: white; }
-        .btn-issue { background: #fbbc04; color: #3c4043; }
-        .btn-logout { background: none; color: var(--danger); width: auto; font-size: 13px; }
-        #log { text-align: center; margin-top: 15px; font-weight: bold; color: var(--success); }
+        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        h3 { margin: 0 0 20px 0; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        label { display: block; margin-top: 15px; font-size: 13px; color: #5f6368; font-weight: bold; }
+        input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-family: 'Sarabun'; font-size: 15px; transition: 0.3s; }
+        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(26,115,232,0.1); }
+        
+        .calc-box { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid #eef0f2; }
+        .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .total-row { font-size: 22px; font-weight: bold; color: var(--primary); border-top: 2px solid #eef0f2; margin-top: 10px; padding-top: 10px; }
+        
+        .btn-main { width: 100%; padding: 16px; background: var(--success); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-main:hover { background: #2d8e47; transform: translateY(-2px); }
+        .btn-history { width: 100%; padding: 12px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* การออกแบบใบเสร็จ (Receipt Design) */
+        #receipt-print { 
+            display: none; 
+            width: 80mm; 
+            padding: 15px; 
+            background: white; 
+            color: black; 
+            line-height: 1.5;
+            font-size: 13px;
+        }
+        .r-header { text-align: center; margin-bottom: 10px; }
+        .r-shop-name { font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+        .r-title { border: 1px solid black; display: inline-block; padding: 2px 10px; font-weight: bold; margin: 10px 0; }
+        .r-dashed { border-top: 1px dashed black; margin: 10px 0; }
+        .r-flex { display: flex; justify-content: space-between; }
+        .r-bold { font-weight: bold; }
+        .r-footer { text-align: center; margin-top: 15px; font-size: 11px; }
+        .qr-img { width: 140px; height: 140px; margin: 10px auto; display: block; }
+
+        /* ตั้งค่าสำหรับการสั่งพิมพ์ หรือบันทึกเป็น PDF */
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-print, #receipt-print * { visibility: visible; }
+            #receipt-print { 
+                display: block !important; 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 80mm; /* ขนาดสลิปมาตรฐาน */
+            }
+            @page { size: auto; margin: 0; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <span id="user-display">👤 กำลังโหลด...</span>
-            <button class="btn-logout" onclick="logout()">ออกจากระบบ</button>
-        </div>
-        
-        <div class="card">
-            <h3>📝 บันทึกการขาย</h3>
-            <label>ชื่อลูกค้า</label>
-            <input id="cus" placeholder="ระบุชื่อลูกค้า">
-            
-            <label>รายละเอียด</label>
-            <textarea id="detail" rows="3" placeholder="รายการสินค้า..."></textarea>
-            
-            <label>ยอดเงินสุทธิ (บาท)</label>
-            <input id="total" type="number" placeholder="0.00" style="font-size: 20px; font-weight: bold; color: var(--primary);">
 
-            <div id="log"></div>
-
-            <button class="btn-main" onclick="save()">💾 บันทึกข้อมูล</button>
-            
-            <div class="btn-group">
-                <button class="btn-history" onclick="location.href='history.html'">📊 ดูประวัติบิล</button>
-                <button class="btn-issue" onclick="location.href='issue.html'">⚠️ แจ้งปัญหา</button>
-            </div>
-        </div>
+<div class="container">
+    <div class="card" style="background: #e8f0fe; border: 1px solid #c2d7fa;">
+        <label>⚙️ ตั้งค่าหัวบิล</label>
+        <input id="shop-name" placeholder="ชื่อร้านค้า" onchange="saveShop()">
+        <input id="shop-addr" placeholder="ที่อยู่ร้าน" onchange="saveShop()">
+        <input id="shop-tel" placeholder="เบอร์โทรศัพท์" onchange="saveShop()">
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <div class="card">
+        <h3>📝 ออกใบเสร็จรับเงิน</h3>
+        <label>ชื่อลูกค้า</label>
+        <input id="cus" placeholder="ระบุชื่อลูกค้า">
+        
+        <label>รายการสินค้า / บริการ</label>
+        <textarea id="detail" rows="3" placeholder="ระบุรายการสินค้าที่ขาย..."></textarea>
+        
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>ยอดรวมสินค้า</label>
+                <input id="subtotal" type="number" value="0" oninput="doCalculate()">
+            </div>
+            <div style="flex: 1;">
+                <label>ส่วนลด (บาท)</label>
+                <input id="discount" type="number" value="0" oninput="doCalculate()">
+            </div>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
-            authDomain: "np-bill.firebaseapp.com",
-            databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "np-bill",
-            storageBucket: "np-bill.firebasestorage.app",
-            messagingSenderId: "516956569692",
-            appId: "1:516956569692:web:961931e70b83a314072699"
+        <div class="calc-box">
+            <div class="calc-row"><span>ภาษีมูลค่าเพิ่ม (VAT 7%):</span> <span id="v-tax">0.00</span></div>
+            <div class="calc-row total-row"><span>ยอดเงินสุทธิ:</span> <span id="v-total">0.00</span></div>
+        </div>
+
+        <button class="btn-main" onclick="saveAndPrint()">💾 บันทึกและออกใบเสร็จ</button>
+        <button class="btn-history" onclick="location.href='history.html'">📊 ดูประวัติย้อนหลัง</button>
+    </div>
+</div>
+
+<div id="receipt-print">
+    <div class="r-header">
+        <div class="r-shop-name" id="p-shop-name">SHOP NAME</div>
+        <div id="p-shop-addr">ADDRESS</div>
+        <div id="p-shop-tel">TEL: 000-000-0000</div>
+        <div class="r-title">ใบเสร็จรับเงิน / RECEIPT</div>
+    </div>
+
+    <div class="r-flex"><span>เลขที่: <span id="p-no" class="r-bold"></span></span></div>
+    <div class="r-flex"><span>วันที่: <span id="p-date"></span></span></div>
+    <div class="r-dashed"></div>
+    
+    <div><strong>ลูกค้า:</strong> <span id="p-cus"></span></div>
+    <div style="margin: 10px 0; min-height: 50px;">
+        <strong>รายการ:</strong><br>
+        <span id="p-detail" style="white-space: pre-wrap;"></span>
+    </div>
+    
+    <div class="r-dashed"></div>
+    
+    <div class="r-flex"><span>ยอดรวมสินค้า:</span> <span id="p-sub">0.00</span></div>
+    <div class="r-flex" style="color: black;"><span>ส่วนลด:</span> <span>- <span id="p-dis">0.00</span></span></div>
+    <div class="r-flex"><span>ภาษีมูลค่าเพิ่ม (7%):</span> <span id="p-tax">0.00</span></div>
+    
+    <div class="r-dashed"></div>
+    <div class="r-flex r-bold" style="font-size: 16px;">
+        <span>ยอดเงินรวมทั้งสิ้น</span>
+        <span><span id="p-total">0.00</span> ฿</span>
+    </div>
+    <div class="r-dashed"></div>
+
+    <div class="r-footer">
+        <strong>สแกนเพื่อจ่ายเงิน / ข้อมูลเพิ่มเติม</strong>
+        <img id="p-qr" class="qr-img" src="">
+        <p>*** ขอบคุณที่มาอุดหนุน ***</p>
+        <p>บันทึกโดย: <span id="p-by"></span></p>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAeXE8OJWnbrQ66L9_YW4HrMm-3EhXn0Ao",
+        databaseURL: "https://np-bill-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if(!user) location.href = "login.html";
+
+    window.onload = () => {
+        document.getElementById("shop-name").value = localStorage.getItem("sn") || "นรภัทร พาณิชย์";
+        document.getElementById("shop-addr").value = localStorage.getItem("sa") || "สมุทรปราการ ประเทศไทย";
+        document.getElementById("shop-tel").value = localStorage.getItem("st") || "08x-xxx-xxxx";
+    };
+
+    window.saveShop = () => {
+        localStorage.setItem("sn", document.getElementById("shop-name").value);
+        localStorage.setItem("sa", document.getElementById("shop-addr").value);
+        localStorage.setItem("st", document.getElementById("shop-tel").value);
+    };
+
+    window.doCalculate = () => {
+        const sub = parseFloat(document.getElementById("subtotal").value) || 0;
+        const dis = parseFloat(document.getElementById("discount").value) || 0;
+        const taxable = sub - dis;
+        const vat = taxable * 0.07;
+        const total = taxable + vat;
+
+        document.getElementById("v-tax").innerText = vat.toLocaleString(undefined,{minimumFractionDigits:2});
+        document.getElementById("v-total").innerText = total.toLocaleString(undefined,{minimumFractionDigits:2});
+        return { sub, dis, vat, total };
+    };
+
+    window.saveAndPrint = async () => {
+        const c = doCalculate();
+        if(!document.getElementById("cus").value || c.sub <= 0) return alert("กรุณาระบุชื่อลูกค้าและยอดเงิน");
+
+        // รันเลขบิลอัตโนมัติ (6902-XXXX)
+        const now = new Date();
+        const prefix = (now.getFullYear()+543).toString().slice(-2) + (now.getMonth()+1).toString().padStart(2,'0');
+        const countSnap = await runTransaction(ref(db, 'lastCount'), v => (v || 0) + 1);
+        const billNo = `${prefix}-${countSnap.snapshot.val().toString().padStart(4,'0')}`;
+
+        const data = {
+            billNo, cus: document.getElementById("cus").value, detail: document.getElementById("detail").value,
+            subtotal: c.sub, discount: c.dis, vat: c.vat, total: c.total,
+            by: user.name, time: now.toLocaleString('th-TH')
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const userData = JSON.parse(localStorage.getItem("user"));
+        try {
+            await push(ref(db, "bills"), data);
+            
+            // ส่งข้อมูลไปที่หน้าใบเสร็จ
+            document.getElementById("p-shop-name").innerText = document.getElementById("shop-name").value;
+            document.getElementById("p-shop-addr").innerText = document.getElementById("shop-addr").value;
+            document.getElementById("p-shop-tel").innerText = "โทร: " + document.getElementById("shop-tel").value;
+            document.getElementById("p-no").innerText = billNo;
+            document.getElementById("p-date").innerText = data.time;
+            document.getElementById("p-cus").innerText = data.cus;
+            document.getElementById("p-detail").innerText = data.detail;
+            document.getElementById("p-sub").innerText = c.sub.toFixed(2);
+            document.getElementById("p-dis").innerText = c.dis.toFixed(2);
+            document.getElementById("p-tax").innerText = c.vat.toFixed(2);
+            document.getElementById("p-total").innerText = c.total.toFixed(2);
+            document.getElementById("p-by").innerText = user.name;
+            
+            // สร้าง QR Code (ข้อมูลบิล)
+            document.getElementById("p-qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BILL:${billNo}|TOTAL:${c.total}`;
 
-        if(!userData) location.href = "login.html";
-        document.getElementById("user-display").innerText = "👤 " + userData.name;
+            // สั่งพิมพ์ (เบราว์เซอร์จะให้เลือกบันทึกเป็น PDF ได้จากหน้านี้)
+            setTimeout(() => {
+                window.print();
+                location.reload(); // เคลียร์หน้าจอหลังพิมพ์
+            }, 500);
 
-        window.save = async () => {
-            const cus = document.getElementById("cus").value;
-            const total = document.getElementById("total").value;
-            if(!cus || !total) return alert("กรุณากรอกข้อมูลให้ครบ");
-
-            try {
-                await push(ref(db, "bills"), {
-                    cus, detail: document.getElementById("detail").value,
-                    total: parseFloat(total), by: userData.name,
-                    time: new Date().toLocaleString('th-TH')
-                });
-                document.getElementById("log").innerText = "✅ บันทึกสำเร็จ!";
-                document.getElementById("cus").value = "";
-                document.getElementById("detail").value = "";
-                document.getElementById("total").value = "";
-                setTimeout(() => document.getElementById("log").innerText = "", 3000);
-            } catch (e) { alert("ผิดพลาด: " + e.message); }
-        };
-
-        window.logout = () => { localStorage.clear(); location.href = "login.html"; };
-    </script>
+        } catch (e) { alert("Error: " + e.message); }
+    };
+</script>
 </body>
 </html>
